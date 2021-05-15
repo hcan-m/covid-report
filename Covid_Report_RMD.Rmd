@@ -26,42 +26,50 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r}
+### Variables
+
+country <- params$country
+
+```
+
 ## INTRODUCTION
 
-In this project, we will analyze the Covid-19 pandemic for a specified time period. This will be an aoutomated report that anyone can change the time period or country or etc. 
+
+## In this project, we will analyze the Covid-19 pandemic for a specified time period. This will be an aoutomated report that anyone can change the time period or country or etc. 
 
 
-World total case number by country on the map Didem 
+## World total case number by country on the map Didem 
 
 
-Country’s demographic stats (Health expenditure of the country per capita percent) (first dose given % fully vaccinated %) Can
+## Country’s demographic stats (Health expenditure of the country per capita percent) (first dose given % fully vaccinated %) Can
 
 
-Detailed report of Country
+## Detailed report of Country
 
 
-First paragraph explain how situation looks like how many people died in the chosen period / how many case / how many hospitalized / how many healed / how many vaccinated / reproduction number Didem
+## First paragraph explain how situation looks like how many people died in the chosen period / how many case / how many hospitalized / how many healed / how many vaccinated / reproduction number Didem
 
 
-Total case number (line) new case Didem
+## Total case number (line) new case Didem
 
 
-Icu-patients + hosp_patients Can
+## Icu-patients + hosp_patients Can
 
 
-Daily death Can
+## Daily death Can
 
 
-Test number Didem
+## Test number Didem
 
 
-Linear regression or correlation between test number and positive case Didem
+## Linear regression or correlation between test number and positive case Didem
 
 
-Vaccination (1st dose (Check if which vaccination is being used) Can
+## Vaccination (1st dose (Check if which vaccination is being used) Can
 
 
-New Vaccination (weekly group by then take max of first dose second dose) Can
+## New Vaccination (weekly group by then take max of first dose second dose) Can
 
 
 
