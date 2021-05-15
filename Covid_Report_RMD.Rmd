@@ -22,14 +22,51 @@ editor_options:
   chunk_output_type: console
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(knitr)
+library(vcd)
+library(grid)
+library(kableExtra)
+library(readxl) # reading from excel
+library(tibble) 
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(ggthemes)
+library(plotly)
+library(ggpmisc)
+library(gridExtra)
+library(ggrepel)
+library(ggforce)
+library(ggraph)
+library(viridis)
+library(ggmap)
+library(maps)
+library(stringr)
+library(tidygeocoder)
+library(RColorBrewer)
+library(scales)
+library(ggpubr)
+library(httr)
+library(readr)
+library(treemapify)
+library(xts)
+library(dygraphs)
+library(egg)
+library(gganimate)
+library(hrbrthemes)
 ```
 
 ```{r}
 ### Variables
 
 country <- params$country
+
 
 ```
 
@@ -72,5 +109,45 @@ country <- params$country
 ## New Vaccination (weekly group by then take max of first dose second dose) Can
 
 
+```{r message=FALSE, warning=FALSE, include=FALSE}
 
+# reading the data set
+
+covid <- read.csv("covid_data.csv", sep=";", header=TRUE)
+
+```
+
+### First Graph (World Map)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+# world map data giving the total case density in each country
+
+total_cases <- covid %>%
+  group_by(Country = location) %>%
+  dplyr::summarize(total_cases = sum(total_cases))%>%
+  mutate(geo(Country, method = 'osm'))
+
+theme_set(theme_bw()) # setting the plot theme
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# creating the map 
+
+qmplot(long, lat, data = total_cases, 
+       size = total_cases,color = I("darkorange"), alpha = I(0.4),
+       zoom = 4, maptype = "toner-lite", 
+       main = "Distribution of Strikes Among US States") +
+  guides(size = FALSE) +
+  scale_size_continuous(range=c(1,25)) +
+  theme(plot.title = element_text(color = "gray35", 
+                                  size = 11, 
+                                  face = "bold", 
+                                  hjust = 0.5),
+        legend.position = "none")
+
+```
 
