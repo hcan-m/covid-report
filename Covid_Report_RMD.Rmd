@@ -158,18 +158,17 @@ covid[1:5,] %>%
 ```
 
 
-## 2. ANALYSIS ABOUT COVID-19 
+<p style="text-align:justify;">Before starting detailed analysis about `r params$country`, first it is beneficial to give a density of total Covid cases for selected time period by country. This information gives the idea about the situation of the pandemic in the world. In below map, total cases in countries (all cases from first reported case to last reported case) between `r params$dts` and `r params$dte` can be seen with bubbles. The wider bubbles indicates the higher total cases in countries.</p> 
 
-In this section, several statistics about Covid-19 pandemic are visualized. Following graphs are reported for `r params$country` and for the time interval `r params$dts` and `r params$dte`. It should be noted that one can produce different report results for other countries and time interval by changing the country and dates in the **"Knit with Parameters"** option.
-
-### The Situation of Covid-19 Pandemic in the World 
+### The Situation of Covid-19 Pandemic in the World
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-# world map data giving the total case density in each country
+# creating  map data giving the total cases in each country
 
 total_cases <- covid %>%
   group_by(Country = location) %>%
+  filter(date >= params$dts & date<=params$dte) %>%
   dplyr::summarize(total_cases = sum(total_cases))%>%
   mutate(geo(Country, method = 'osm'))
 
@@ -183,8 +182,8 @@ theme_set(theme_bw()) # setting the plot theme
 
 qmplot(long, lat, data = total_cases, 
        size = total_cases,color = I("darkred"), alpha = I(0.4),
-       zoom = 4, maptype = "toner-lite", 
-       main = "Covid-19 Cases Density by Country") +
+       zoom = 5, maptype = "toner-lite", 
+       main = paste0("Total Covid-19 Cases by Country between\n", `r params$dts`, "and", `r params$dte`)) +
   guides(size = FALSE) +
   scale_size_continuous(range=c(1,25)) +
   theme(plot.title = element_text(color = "gray35", 
@@ -195,9 +194,39 @@ qmplot(long, lat, data = total_cases,
 
 ```
 
-Explanation about world map will be here.
 
-### Total Case and New Cases Trend 
+
+## 2. ANALYSIS ABOUT COVID-19 
+
+<p style="text-align:justify;">In this section, several statistics about Covid-19 pandemic are visualized. Following graphs are reported for `r params$country` and for the time interval `r params$dts` and `r params$dte`. It should be noted that one can produce different report results for other countries and time interval by changing the country and dates in the **"Knit with Parameters"** option.
+
+Before jumping detailed visual analysis, the key highlights about Covid-19 are provided for `r params$country`. This highlights give the general characteristics of Covid-19 pandemic in `r params$country` . </p> 
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+country_highlight <- covid %>%
+  filter(location == params$country) %>%
+  filter(date>=params$dts & date<= params$dte) %>%
+  dplyr::summarise(
+            Total_Cases = max(total_cases),
+            max_case = max(new_cases, na.rm = TRUE),
+            date_max_case = covid$date[which.max(covid$new_cases)],
+            Avg_New_Cases = mean(new_cases,na.rm = TRUE),
+            Total_Deaths = max(total_deaths, na.rm = TRUE),
+            max_deaths = max(new_deaths, na.rm = TRUE),
+            max_Deaths_date = covid$date[which.max(covid$new_deaths)],
+            Avg_Deaths = mean(new_deaths, na.rm = TRUE),
+            repro_rate = mean(reproduction_rate, na.rm = TRUE)
+            ) 
+```
+
+##### **General characteristics of COVID-19 in ** **`r params$country`**
+
+
+<p style="text-align:justify;">There are **`r country_highlight$Total_Cases`** cases reported between **`r params$dts`** and **`r params$dte`** in **`r params$country`**. The maximum daily case in this period is reached to  **`r country_highlight$max_case`**, which is reported on  **`r country_highlight$date_max_case`**. Average daily case is **`r round(country_highlight$Avg_New_Cases,0)`**. In this period,  **`r country_highlight$Total_Deaths`** people have died and maximum number of death is recorded as **`r country_highlight$max_deaths`** on **`r country_highlight$max_Deaths_date`** . Average daily death is **`r round(country_highlight$Avg_Deaths, 0)`**. Reproduction rate is **`r round(country_highlight$repro_rate,2)`**, which is `r ifelse(country_highlight$repro_rate < 1.16,"below","above")` from world average (world average=1.16). It means that, on average, every 10 people with Covid will infect `r round(country_highlight$repro_rate*10,0)` other people.  </p> 
+
+
+
+### 2.1. Total Case and New Cases Trend 
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 
@@ -238,5 +267,5 @@ ggplot(total_cases, aes(x=date)) +
 
 ```
 
-explanation for the line graph will be here.
+Explanation for the line graph will be here.
 
