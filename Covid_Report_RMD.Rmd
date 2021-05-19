@@ -102,6 +102,39 @@ covid$date <- dmy(covid$date)
 
 ```
 
+<!-- Related statistics are divided between Can and Didem and the structure is as below:  -->
+
+<!-- ## World total case number by country on the map Didem  -->
+
+
+<!-- ## Country’s demographic stats (Health expenditure of the country per capita percent) (first dose given % fully vaccinated %) Can -->
+
+
+<!-- ## Detailed report of Country -->
+
+
+<!-- ## First paragraph explain how situation looks like how many people died in the chosen period / how many case / how many hospitalized / how many healed / how many vaccinated / reproduction number Didem -->
+
+
+<!-- ## Total case number (line) new case Didem -->
+
+
+<!-- ## Icu-patients + hosp_patients Can -->
+
+
+<!-- ## Daily death Can -->
+
+
+<!-- ## Test number Didem -->
+
+
+<!-- ## Linear regression or correlation between test number and positive case Didem -->
+
+
+<!-- ## Vaccination (1st dose (Check if which vaccination is being used) Can -->
+
+
+<!-- ## New Vaccination (weekly group by then take max of first dose second dose) Can -->
 
 ## 1. INTRODUCTION
 
@@ -125,44 +158,9 @@ covid[1:5,] %>%
 ```
 
 
-### 2. ANALYSIS ABOUT COVID-19
+## 2. ANALYSIS ABOUT COVID-19 
 
-
- Related statistics are divided between Can and Didem and the structure is as below: 
-
-## World total case number by country on the map Didem 
-
-
-## Country’s demographic stats (Health expenditure of the country per capita percent) (first dose given % fully vaccinated %) Can
-
-
-## Detailed report of Country
-
-
-## First paragraph explain how situation looks like how many people died in the chosen period / how many case / how many hospitalized / how many healed / how many vaccinated / reproduction number Didem
-
-
-## Total case number (line) new case Didem
-
-
-## Icu-patients + hosp_patients Can
-
-
-## Daily death Can
-
-
-## Test number Didem
-
-
-## Linear regression or correlation between test number and positive case Didem
-
-
-## Vaccination (1st dose (Check if which vaccination is being used) Can
-
-
-## New Vaccination (weekly group by then take max of first dose second dose) Can
-
-
+In this section, several statistics about Covid-19 pandemic are visualized. Following graphs are reported for `r params$country` and for the time interval `r params$dts` and `r params$dte`. It should be noted that one can produce different report results for other countries and time interval by changing the country and dates in the **"Knit with Parameters"** option.
 
 ### The Situation of Covid-19 Pandemic in the World 
 
@@ -186,7 +184,7 @@ theme_set(theme_bw()) # setting the plot theme
 qmplot(long, lat, data = total_cases, 
        size = total_cases,color = I("darkred"), alpha = I(0.4),
        zoom = 4, maptype = "toner-lite", 
-       main = "Distribution of Strikes Among US States") +
+       main = "Covid-19 Cases Density by Country") +
   guides(size = FALSE) +
   scale_size_continuous(range=c(1,25)) +
   theme(plot.title = element_text(color = "gray35", 
@@ -197,8 +195,9 @@ qmplot(long, lat, data = total_cases,
 
 ```
 
+Explanation about world map will be here.
 
-### Total Case vs. New Case
+### Total Case and New Cases Trend 
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 
@@ -239,4 +238,5 @@ ggplot(total_cases, aes(x=date)) +
 
 ```
 
+explanation for the line graph will be here.
 
