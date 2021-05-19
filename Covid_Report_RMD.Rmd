@@ -184,7 +184,7 @@ theme_set(theme_bw()) # setting the plot theme
 # creating the map 
 
 qmplot(long, lat, data = total_cases, 
-       size = total_cases,color = I("darkorange"), alpha = I(0.4),
+       size = total_cases,color = I("darkred"), alpha = I(0.4),
        zoom = 4, maptype = "toner-lite", 
        main = "Distribution of Strikes Among US States") +
   guides(size = FALSE) +
@@ -202,6 +202,7 @@ qmplot(long, lat, data = total_cases,
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 
+# obtaining total cases and new cases for selected country and selected date range
 total_cases <- covid %>%
   filter(location == params$country ) %>%
   select(date, location, total_cases, new_cases) %>%
@@ -210,7 +211,9 @@ total_cases <- covid %>%
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# line graph of total cases vs. new cases in the country
+
+# line graph of total cases vs. new cases in the country in the specified date range
+
 options(scipen = 100)
 ggplot(total_cases, aes(x=date)) +
   geom_line(aes(y = total_cases), color = "orange1", size = 1 ) +
