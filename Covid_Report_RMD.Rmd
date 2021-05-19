@@ -2,11 +2,11 @@
 title: |
  <p align="center">
   <img src="https://www.wne.uw.edu.pl/themes/wne/images/en-logo.gif"></p>  
-  <h2 style="color:#660033;" align= "center">**Advanced R Visualization Final Project**</h2>
-subtitle: <h4 style="color:DimGrey;" align= "center">_A Look at the Pandemic for a Specified Period</h4>
+  <h2 style="color:#660033;" align= "center">**Reproducible Research Final Project**</h2>
+subtitle: <h4 style="color:DimGrey;" align= "center">_Covid-19 Automated Report_</h4>
 author: 
-  - <h5 style="color:Grey;" align="center">_Huseyin Can Minareci, 417121_</h5>
   - <h5 style="color:Grey;" align="center">_Didem Paloglu, 425160_</h5>
+  - <h5 style="color:Grey;" align="center">_Huseyin Can Minareci, 111111_</h5>
 output:
   html_document:
     self_contained: true
@@ -20,6 +20,24 @@ output:
     smooth_scroll: true
 editor_options: 
   chunk_output_type: console
+params:
+  dts: 
+    label: "Start Date"
+    input: date
+    value: "2020-01-01"
+    min: "2020-01-01"
+    max: "2021-05-05"
+  dte: 
+    label: "End Date"
+    input: date
+    value: "2021-05-05"
+    min: "2020-01-01"
+    max: "2021-05-05"
+  country:
+    value: United States
+    label: "Country"
+    input: select
+    choices: [Afghanistan,	Africa,	Albania,	Algeria,	Andorra,	Angola,	Antigua and Barbuda,	Argentina,	Armenia,	Aruba,Australia,	Austria,	Azerbaijan,	Bahamas,	Bahrain,	Bangladesh,	Barbados,	Belarus,	Belgium,	Belize,	Benin,	Bhutan,	Bolivia,	Bosnia and Herzegovina,	Botswana,	Brazil,	Brunei,	Bulgaria,	Burkina Faso,	Burundi,	Cambodia,	Cameroon,	Canada,	Cape Verde,	Central African Republic,	Chad,	Chile,	China,	Colombia,	Comoros,	Congo,	Costa Rica,	Cote d'Ivoire,	Croatia,	Cuba,	Curacao,	Cyprus,	Czechia,	Democratic Republic of Congo,	Denmark,	Djibouti,	Dominica,	Dominican Republic,	Ecuador,	Egypt,	El Salvador,	Equatorial Guinea,	Eritrea,	Estonia,	Eswatini,	Ethiopia,	Europe,	Fiji,	Finland,	France,	Gabon,	Gambia,	Georgia,	Germany,	Ghana,	Greece,	Grenada,	Guatemala,	Guinea,	Guinea-Bissau,	Guyana,	Haiti,	Honduras,	Hong Kong,	Hungary,	Iceland,	India,	Indonesia,	Iran,	Iraq,	Ireland,	Isle of Man,	Israel,	Italy,	Jamaica,	Japan,	Jordan,	Kazakhstan,	Kenya,	Kosovo,	Kuwait,	Kyrgyzstan,	Laos,	Latvia,	Lebanon,	Lesotho,	Liberia,	Libya,	Liechtenstein,	Lithuania,	Luxembourg,	Macao,	Madagascar,	Malawi,	Malaysia,	Maldives,	Mali,	Malta,	Marshall Islands,	Mauritania,	Mauritius,	Mexico,	Micronesia (country),	Moldova,	Monaco,	Mongolia,	Montenegro,	Morocco,	Mozambique,	Myanmar,	Namibia,	Nepal,	Netherlands,	New Zealand,	Nicaragua,	Niger,	Nigeria,	North Macedonia,	Norway,	Oceania,	Oman,	Pakistan,	Palestine,	Panama,	Papua New Guinea,	Paraguay,	Peru,	Philippines,	Poland,	Portugal,	Qatar,	Romania,	Russia,	Rwanda,	Saint Kitts and Nevis,	Saint Lucia,	Saint Vincent and the Grenadines,	Samoa,	San Marino,	Sao Tome and Principe,	Saudi Arabia,	Senegal,	Serbia,	Seychelles,	Sierra Leone,	Singapore,	Slovakia,	Slovenia,	Solomon Islands,	Somalia,	South Korea,	South Sudan,	Spain,	Sri Lanka,	Sudan,	Suriname,	Sweden,	Switzerland,	Syria,	Taiwan,	Tajikistan,	Tanzania,	Thailand,	Timor,	Togo,	Trinidad and Tobago,	Tunisia,	Turkey,	Uganda,	Ukraine,	United Arab Emirates,	United Kingdom,	United States,	Uruguay,	Uzbekistan,	Vanuatu,	Vatican,	Venezuela,	Vietnam,	Yemen,	Zambia,	Zimbabwe,	Greenland,	Gibraltar,	Cayman Islands,	Faeroe Islands,	Jersey,	Bermuda,	Tonga,	Northern Cyprus,	Anguilla,	Montserrat,	Guernsey,	Nauru,	Falkland Islands,	Turks and Caicos Islands,	Saint Helena]
 ---
 
 
@@ -27,7 +45,9 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# installing required packages
+
 library(knitr)
 library(vcd)
 library(grid)
@@ -62,19 +82,53 @@ library(gganimate)
 library(hrbrthemes)
 ```
 
-```{r}
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+# reading the data set
+
+covid <- read.csv("covid_data.csv", sep=";", header=TRUE, stringsAsFactors = FALSE)
+covid$date <- dmy(covid$date)
+
+```
+
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
 ### Variables
 
-country <- params$country
+#country <- params$country
 
 
 ```
 
-## INTRODUCTION
+
+## 1. INTRODUCTION
+
+### 1.1. Aim of the Project
+
+<p style="text-align:justify;">In this project, it is aimed to visualize the main insights about Covid-19 pandemic. Starting from _'2020-01-01'_ ,  pandemic data from all countries is recorded in the data set. The data set is very useful and gives wide information about status of countries in pandemic period. There are information about cases, deaths, reproduction rates, intensive care unit(icu) patients, tests, positiveness rates, vaccinations etc. </p> 
 
 
-## In this project, we will analyze the Covid-19 pandemic for a specified time period. This will be an aoutomated report that anyone can change the time period or country or etc. 
+### 1.2. Information About Data Set
 
+<p style="text-align:justify;">The dataset is extracted from [Our World in Data](https://ourworldindata.org/coronavirus-source-data) and it can be downloaded from [GitHub Covid-19  Repository](https://github.com/owid/covid-19-data/tree/master/public/data).It contains 59 columns and 86,118 rows giving information about each country. The head of data set is provided below:</p> 
+
+
+```{r, echo=FALSE}
+# Table giving first 5 rows of the data set
+covid[1:5,] %>%
+  kable(digits = 2, format = "html", row.names = TRUE, caption = "Data Set with First 5 Rows") %>%
+  kable_styling(bootstrap_options = c("striped"), font_size = 10) %>%
+  row_spec(row = 0, color = "#660033") %>% 
+  scroll_box(width = "100%")
+```
+
+
+### 2. ANALYSIS ABOUT COVID-19
+
+
+ Related statistics are divided between Can and Didem and the structure is as below: 
 
 ## World total case number by country on the map Didem 
 
@@ -109,18 +163,10 @@ country <- params$country
 ## New Vaccination (weekly group by then take max of first dose second dose) Can
 
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
 
-# reading the data set
-
-covid <- read.csv("covid_data.csv", sep=";", header=TRUE)
-
-```
-
-### First Graph (World Map)
+### The Situation of Covid-19 Pandemic in the World 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-
 
 # world map data giving the total case density in each country
 
@@ -150,4 +196,44 @@ qmplot(long, lat, data = total_cases,
         legend.position = "none")
 
 ```
+
+
+### Total Case vs. New Case
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+total_cases <- covid %>%
+  filter(location == params$country ) %>%
+  select(date, location, total_cases, new_cases) %>%
+  filter(date >= params$dts & date <= params$dte)
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# line graph of total cases vs. new cases in the country
+options(scipen = 100)
+ggplot(total_cases, aes(x=date)) +
+  geom_line(aes(y = total_cases), color = "orange1", size = 1 ) +
+  geom_line(aes(y= new_cases*100), color = "steelblue", size = 1) +
+  
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = "Number of Total Cases",
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis( trans=~./100, name="Number of New Cases")
+  ) + theme_ipsum() +
+  labs(title = paste0('Total Cases vs. New Cases in ', params$country, " Between\n", params$dts, " and ", params$dte),
+       x = 'Date') +
+  theme(plot.title = element_text(color = "gray35", 
+                                  size = 11, 
+                                  face = "bold", 
+                                  hjust = 0.5),
+        axis.title.y = element_text( size=9, hjust = 0.5, color = "orange1", face = "bold"),
+        axis.title.y.right = element_text(size=9, hjust = 0.5, color = "steelblue", face = "bold"),
+        axis.title.x = element_text(size=10, hjust = 0.5, face="bold"))
+
+```
+
 
