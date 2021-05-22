@@ -6,7 +6,7 @@ title: |
 subtitle: <h4 style="color:DimGrey;" align= "center">_Covid-19 Automated Report_</h4>
 author: 
   - <h5 style="color:Grey;" align="center">_Didem Paloglu, 425160_</h5>
-  - <h5 style="color:Grey;" align="center">_Huseyin Can Minareci, 111111_</h5>
+  - <h5 style="color:Grey;" align="center">_Huseyin Can Minareci, 417121_</h5>
 output:
   html_document:
     self_contained: true
@@ -140,12 +140,15 @@ covid$date <- dmy(covid$date)
 
 ### 1.1. Aim of the Project
 
-<p style="text-align:justify;">In this project, it is aimed to visualize the main insights about Covid-19 pandemic. Starting from _'2020-01-01'_ ,  pandemic data from all countries is recorded in the data set. The data set is very useful and gives wide information about status of countries in pandemic period. There are information about cases, deaths, reproduction rates, intensive care unit(icu) patients, tests, positiveness rates, vaccinations etc. </p> 
+<p style="text-align:justify;">In this project, it is aimed to visualize the main insights about Covid-19 pandemic. Starting from _'2020-01-01'_ ,  pandemic data from all countries is recorded in the data set until _'2021-05-05'_. The data set is very useful and gives wide information about status of countries in pandemic period. There are information about cases, deaths, reproduction rates, intensive care unit (icu) patients, tests, positiveness rates, vaccinations etc. Moreover, there are also additional information giving basic demographic statistics and also health statistics about countries such as smoking status by gender, life expectancy, population and its distribution over 65+ and 70+ aged people.
+
+The main objective is providing an automated report so that any one who wonder the situation about a country or in time period could select desired values and create the automatic report for that country/time line.
+The default country is selected as United States and the time period is selected to cover all records of the data set.</p> 
 
 
 ### 1.2. Information About Data Set
 
-<p style="text-align:justify;">The dataset is extracted from [Our World in Data](https://ourworldindata.org/coronavirus-source-data) and it can be downloaded from [GitHub Covid-19  Repository](https://github.com/owid/covid-19-data/tree/master/public/data).It contains 59 columns and 86,118 rows giving information about each country. The head of data set is provided below:</p> 
+<p style="text-align:justify;">The dataset is extracted from [Our World in Data](https://ourworldindata.org/coronavirus-source-data) and it can be downloaded from [GitHub Covid-19  Repository](https://github.com/owid/covid-19-data/tree/master/public/data).It contains 59 columns and 86,118 rows giving information about each region and country in the world. To give the main structure, the head of data set is provided below:</p> 
 
 
 ```{r, echo=FALSE}
@@ -157,10 +160,21 @@ covid[1:5,] %>%
   scroll_box(width = "100%")
 ```
 
+<br>
 
-<p style="text-align:justify;">Before starting detailed analysis about `r params$country`, first it is beneficial to give a density of total Covid cases for selected time period by country. This information gives the idea about the situation of the pandemic in the world. In below map, total cases in countries (all cases from first reported case to last reported case) between `r params$dts` and `r params$dte` can be seen with bubbles. The wider bubbles indicates the higher total cases in countries.</p> 
+***
+<p style="text-align:justify;"> _**Note 1:**_ The default country for the report is chosen as United States. If the user of the report does not specify any country, the report will be created for United States. </p> 
+***
 
-### The Situation of Covid-19 Pandemic in the World
+***
+<p style="text-align:justify;"> _**Note 2:**_ The default time period for the report is chosen to cover all time range (between 2020-01-01 and 2021-05-05). If the user of the report does not specify any time period, the report will be created for all time period. </p> 
+***
+
+
+### 1.3. General Situation of Covid-19 Pandemic in the World
+
+<p style="text-align:justify;">Before starting detailed analysis, it is beneficial to provide distribution and density of total Covid cases for all countries to give the general idea/information about what's happening in the world. In below map, total cases (from first reported case to last reported case) in all avaliable countries between **`r params$dts`** and **`r params$dte`** is provided. The wider bubbles indicates the higher number of cases in countries. </p> 
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -169,38 +183,38 @@ covid[1:5,] %>%
 total_cases <- covid %>%
   group_by(Country = location) %>%
   filter(date >= params$dts & date<=params$dte) %>%
-  dplyr::summarize(total_cases = sum(total_cases))%>%
+  dplyr::summarize(total_cases = sum(new_cases), date =date)%>%
   mutate(geo(Country, method = 'osm'))
 
 theme_set(theme_bw()) # setting the plot theme
 
-
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', fig.height=7, fig.width=7}
 # creating the map 
 
 qmplot(long, lat, data = total_cases, 
        size = total_cases,color = I("darkred"), alpha = I(0.4),
-       zoom = 5, maptype = "toner-lite", 
-       main = paste0("Total Covid-19 Cases by Country between\n", `r params$dts`, "and", `r params$dte`)) +
+       zoom = 4, maptype = "toner-lite", 
+       main = paste0("Total Covid-19 Cases by Country Between\n", params$dts, " and ", params$dte)) +
   guides(size = FALSE) +
   scale_size_continuous(range=c(1,25)) +
   theme(plot.title = element_text(color = "gray35", 
                                   size = 11, 
                                   face = "bold", 
                                   hjust = 0.5),
-        legend.position = "none")
+        panel.border = element_rect(color = "white"),
+        legend.position = "none") 
 
 ```
 
 
 
-## 2. ANALYSIS ABOUT COVID-19 
+## 2. DETAILED ANALYSIS ABOUT COVID-19 
 
-<p style="text-align:justify;">In this section, several statistics about Covid-19 pandemic are visualized. Following graphs are reported for `r params$country` and for the time interval `r params$dts` and `r params$dte`. It should be noted that one can produce different report results for other countries and time interval by changing the country and dates in the **"Knit with Parameters"** option.
+<p style="text-align:justify;">In this section, several analysis about Covid-19 pandemic is provided. All analysis are reported for **`r params$country`** in the time interval **`r params$dts`** and **`r params$dte`**. It should be noted that one can produce different report results for other countries and time interval by changing the country and dates in the **"Knit with Parameters"** option.
 
-Before jumping detailed visual analysis, the key highlights about Covid-19 are provided for `r params$country`. This highlights give the general characteristics of Covid-19 pandemic in `r params$country` . </p> 
+Before jumping detailed visual analysis, the key highlights about Covid-19 are provided. This highlights give the general characteristics of Covid-19 pandemic in `r params$country` . </p> 
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 country_highlight <- covid %>%
@@ -219,12 +233,14 @@ country_highlight <- covid %>%
             ) 
 ```
 
-##### **General characteristics of COVID-19 in ** **`r params$country`**
+###### **General characteristics of COVID-19 in ** **`r params$country`**
 
 
-<p style="text-align:justify;">There are **`r country_highlight$Total_Cases`** cases reported between **`r params$dts`** and **`r params$dte`** in **`r params$country`**. The maximum daily case in this period is reached to  **`r country_highlight$max_case`**, which is reported on  **`r country_highlight$date_max_case`**. Average daily case is **`r round(country_highlight$Avg_New_Cases,0)`**. In this period,  **`r country_highlight$Total_Deaths`** people have died and maximum number of death is recorded as **`r country_highlight$max_deaths`** on **`r country_highlight$max_Deaths_date`** . Average daily death is **`r round(country_highlight$Avg_Deaths, 0)`**. Reproduction rate is **`r round(country_highlight$repro_rate,2)`**, which is `r ifelse(country_highlight$repro_rate < 1.16,"below","above")` from world average (world average=1.16). It means that, on average, every 10 people with Covid will infect `r round(country_highlight$repro_rate*10,0)` other people.  </p> 
+<p style="text-align:justify;"><mark>Between **`r params$dts`** and **`r params$dte`**, the number of total cases has been reach to **`r country_highlight$Total_Cases`** in **`r params$country`**. The maximum number of daily cases in this period has been reached to  **`r country_highlight$max_case`**, which is reported on  **`r country_highlight$date_max_case`** and average daily case is **`r round(country_highlight$Avg_New_Cases,0)`**. In this period,  **`r country_highlight$Total_Deaths`** people have died and maximum number of death is recorded as **`r country_highlight$max_deaths`** on **`r country_highlight$max_Deaths_date`**  and average daily death is **`r round(country_highlight$Avg_Deaths, 0)`**. Reproduction rate is **`r round(country_highlight$repro_rate,2)`**, which is `r ifelse(country_highlight$repro_rate < 1.16,"below","above")` from world average (world average=1.16). It means that, on average, every 10 people with Covid will infect `r round(country_highlight$repro_rate*10,0)` other people. </p></mark>
 
+<br>
 
+After giving general characteristics of the pandemic in the selected time period, the detailed analysis is helpful to see the pandemic trend deeply. The following sections shows the important analysis about the country. 
 
 ### 2.1. Total Case and New Cases Trend 
 
@@ -238,23 +254,26 @@ total_cases <- covid %>%
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
 
 # line graph of total cases vs. new cases in the country in the specified date range
 
 options(scipen = 100)
 ggplot(total_cases, aes(x=date)) +
-  geom_line(aes(y = total_cases), color = "orange1", size = 1 ) +
-  geom_line(aes(y= new_cases*100), color = "steelblue", size = 1) +
+  geom_bar(aes(y= new_cases*100),stat="identity", fill = "steelblue", size = 1, alpha= 0.5) +
+   geom_line(aes(y = total_cases), color = "orange1", size = 1 ) +
   
   scale_y_continuous(
     
     # Features of the first axis
     name = "Number of Total Cases",
-    
+    # breaks = seq(0,300000,by = 50000),
+    # labels = paste0(format(seq(0,300,by = 50)),"K"),
     # Add a second axis and specify its features
     sec.axis = sec_axis( trans=~./100, name="Number of New Cases")
-  ) + theme_ipsum() +
+  ) + 
+  scale_x_date(date_breaks = "3 month", date_labels = "%Y %b") +
+  theme_ipsum() +
   labs(title = paste0('Total Cases vs. New Cases in ', params$country, " Between\n", params$dts, " and ", params$dte),
        x = 'Date') +
   theme(plot.title = element_text(color = "gray35", 
@@ -262,10 +281,62 @@ ggplot(total_cases, aes(x=date)) +
                                   face = "bold", 
                                   hjust = 0.5),
         axis.title.y = element_text( size=9, hjust = 0.5, color = "orange1", face = "bold"),
+        axis.text.x = element_text( size=8, hjust = 0.5),
+        axis.text.y = element_text( size=9, hjust = 0.5),
         axis.title.y.right = element_text(size=9, hjust = 0.5, color = "steelblue", face = "bold"),
         axis.title.x = element_text(size=10, hjust = 0.5, face="bold"))
 
 ```
 
 Explanation for the line graph will be here.
+
+
+#### Daily Tests and Positive Rates
+
+
+```{r echo=FALSE, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+# obtaining daily tests and positive rates for selected country and selected date range
+
+test <- covid %>%
+  filter(location == params$country ) %>%
+  select(date, location, new_tests, new_tests_per_thousand,total_tests, positive_rate ) %>%
+  mutate(new_positive_test = new_tests*positive_rate) %>%
+  filter(date >= params$dts & date <= params$dte)
+
+ay <- list(
+  overlaying = "y",
+  side = "right",
+  title = "Positivity Rate",
+  tickformat = ',.0%',
+  range = c(0,0.2)
+)
+
+p <- plot_ly(test) %>% 
+add_bars(x = ~date, y = ~new_tests, name = 'Daily Tests', 
+         hovertemplate = paste('<br>Date: %{x}',
+                               '<br>Total Daily Tests: %{y:.2s}'),
+marker = list(color = 'steelblue', opacity = 0.1)) %>%
+add_lines(x = ~date, y = ~positive_rate, name = 'Positivity Rate', 
+          hovertemplate = paste('<br>Date: %{x}',
+                                '<br>Positivity Rate: %{y}'),
+line = list(shape = "spline", color='orange'), yaxis = "y2") %>%
+add_bars(x = ~date, y = ~new_positive_test, name = 'Positive Tests',
+         hovertemplate = paste('<br>Date: %{x}',
+                               '<br>Positive Test: %{y:.2s}'),
+marker = list(color = 'pink', opacity = 0.5)) %>%
+
+layout(yaxis2 = ay,
+       xaxis = list(title = ""),
+       yaxis = list(title = "Daily Tests"),
+       title = "Daily Changes in Tests Performed and Positivity Rates",
+       barmode = 'group',
+       margin = 100,
+       legend = list(orientation = "h",   # show entries horizontally
+                     xanchor = "center",  # use center of legend as anchor
+                     x = 0.5))
+p  
+
+
+```
+
 
