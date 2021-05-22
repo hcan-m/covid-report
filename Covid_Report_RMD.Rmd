@@ -45,7 +45,7 @@ params:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
+```{r libraries, message=FALSE, warning=FALSE, include=FALSE}
 # installing required packages
 
 library(knitr)
@@ -85,7 +85,7 @@ library(hrbrthemes)
 ```
 
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
+```{r read data, message=FALSE, warning=FALSE, include=FALSE}
 
 # reading the data set
 
@@ -96,7 +96,7 @@ covid$date <- dmy(covid$date)
 
 
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
+```{r variables, message=FALSE, warning=FALSE, include=FALSE}
 ### Variables
 
 #country <- params$country
@@ -153,7 +153,7 @@ The default country is selected as United States and the time period is selected
 <p style="text-align:justify;">The dataset is extracted from [Our World in Data](https://ourworldindata.org/coronavirus-source-data) and it can be downloaded from [GitHub Covid-19  Repository](https://github.com/owid/covid-19-data/tree/master/public/data). It contains 59 columns and 86,118 rows giving information about each region and country in the world. To give the main structure, the head of data set is provided below:</p> 
 
 
-```{r, echo=FALSE}
+```{r head, echo=FALSE}
 # Table giving first 5 rows of the data set
 covid[1:5,] %>%
   kable(digits = 2, format = "html", row.names = TRUE, caption = "Data Set with First 5 Rows") %>%
@@ -178,7 +178,7 @@ covid[1:5,] %>%
 <p style="text-align:justify;">Before starting detailed analysis, it is beneficial to provide distribution and density of total Covid cases for all countries to give the general idea/information about what's happening in the world. In below map, total cases (from first reported case to last reported case) in all avaliable countries between **`r params$dts`** and **`r params$dte`** is provided. The wider bubbles indicates the higher number of cases in countries. </p> 
 
 
-```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r dataprep map, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 
 # creating  map data giving the total cases in each country
 
@@ -192,7 +192,7 @@ theme_set(theme_bw()) # setting the plot theme
 
 ```
 
-```{r eval=FALSE, fig.align='center', fig.height=7, fig.width=7, message=FALSE, warning=FALSE, include=FALSE}
+```{r map, eval=FALSE, fig.align='center', fig.height=7, fig.width=7, message=FALSE, warning=FALSE, include=FALSE}
 # creating the map 
 
 qmplot(long, lat, data = total_cases, 
@@ -210,11 +210,10 @@ qmplot(long, lat, data = total_cases,
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r map 2, echo=FALSE, message=FALSE, warning=FALSE}
 geo_info <- geo(unique(covid$location), method = 'osm')
 geo_info <- as.data.frame(geo_info) %>%na.omit()
 geo_data<-merge(x=covid,y=geo_info,by.x="location", by.y = "address", x.all=TRUE, y.all=FALSE)
-
 df <- geo_data %>%
   filter(date>=params$dts & date<= params$dte) %>%
   dplyr::select(location,new_cases) %>%
@@ -224,10 +223,7 @@ df <- geo_data %>%
   filter(!(location %in% c("Africa", "Asia", "Europe", "European Union", "International", 
                      "North America", "South America","Oceania", "World")))
   
-
 geo_df<-merge(x=df,y=geo_info,by.x="location", by.y = "address", x.all=TRUE, y.all=FALSE)
-
-
 # We can now customize those markers to look better
 leaflet(geo_df) %>%
   addTiles() %>%
@@ -239,7 +235,6 @@ leaflet(geo_df) %>%
                    popup = ~paste0(
                      "<b>", location, "</b><br/>",
                      "Total Cases: ", Total))
-
 ```
 
 ## 2. DETAILED ANALYSIS ABOUT COVID-19 
@@ -248,7 +243,7 @@ leaflet(geo_df) %>%
 
 Before jumping detailed visual analysis, the key highlights about Covid-19 are provided. This highlights give the general characteristics of Covid-19 pandemic in `r params$country` . </p> 
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
+```{r highlight, message=FALSE, warning=FALSE, include=FALSE}
 country_highlight <- covid %>%
   filter(location == params$country) %>%
   filter(date>=params$dts & date<= params$dte) %>%
@@ -277,7 +272,7 @@ After giving general characteristics of the pandemic in the selected time period
 
 ### 2.1. Total Cases and Daily Cases
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
+```{r total and daily, message=FALSE, warning=FALSE, include=FALSE}
 
 # obtaining total cases and new cases for selected country and selected date range
 total_cases <- covid %>%
@@ -287,7 +282,7 @@ total_cases <- covid %>%
 
 ```
 
-```{r echo=FALSE, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+```{r total vs new, echo=FALSE, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
 
 # line graph of total cases vs. new cases in the country in the specified date range
 
@@ -326,7 +321,7 @@ Explanation for the line graph will be here.
 
 ### 2.2. Daily Cases and Deaths
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
+```{r prep cases deaths, message=FALSE, warning=FALSE, include=FALSE}
 
 cases_death <- covid %>%
   select(location, date,new_cases, new_deaths, total_cases) %>%
@@ -335,7 +330,7 @@ cases_death <- covid %>%
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r cases and deaths, echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(cases_death, aes(x=date)) +
   geom_bar(aes(y= new_deaths*100),stat="identity", fill = "darkred", alpha= 0.4) +
    geom_line(aes(y = new_cases), color = "darkred", size = 0.8, alpha= 0.7 ) +
@@ -369,7 +364,7 @@ ggplot(cases_death, aes(x=date)) +
 ### 2.3. Daily Tests and Positive Rates
 
 
-```{r echo=FALSE, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+```{r test and positve, echo=FALSE, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
 # obtaining daily tests and positive rates for selected country and selected date range
 
 test <- covid %>%
@@ -418,7 +413,7 @@ p
 
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r hosp, echo=FALSE, message=FALSE, warning=FALSE}
 hosp2 <- covid %>%
   select(location, date, hosp_patients,icu_patients ) %>%
   filter(location == params$country & date >= params$dts & date <= params$dte) %>%
