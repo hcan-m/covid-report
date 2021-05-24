@@ -448,15 +448,17 @@ ggplot(hosp2, aes(x = date, y = value, group = key, fill = key)) + geom_bar(stat
 vacdata <- covid %>%
   select(location, date, people_fully_vaccinated, people_vaccinated, new_vaccinations, population) %>%
   filter(location == params$country & date >= params$dts & date <= params$dte) %>%
-  na.omit() %>% 
-  pivot_longer(cols=c(people_fully_vaccinated,people_vaccinated),names_to = "vaccination", values_to="People")
+  pivot_longer(cols=c(people_fully_vaccinated,people_vaccinated),names_to = "vaccination", values_to="People") %>%
+  na.omit()
 
+as.Date()
 
 vacp <- vacdata %>% 
   ggplot( aes(x=date, y=People/population, fill=vaccination, text=People/population)) +
   geom_line() +
   geom_area(position = "identity", alpha = 0.6)+
   scale_y_continuous(labels = scales::percent,limits = c(0,1)) +
+  scale_x_date(limits = c(as.Date(params$dts, "%Y-%m-%d"), as.Date(params$dte, "%Y-%m-%d"))) +
   theme_ipsum() +
   theme(legend.position = "none")+
   labs(title = paste("Vaccination in", params$country, "from", params$dts,"to", params$dte, "\n1st Dose and Fully Vaccinated"),
