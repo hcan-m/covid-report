@@ -91,15 +91,14 @@ library(hrbrthemes)
 
 covid <- read.csv("covid_data.csv", sep=";", header=TRUE, stringsAsFactors = FALSE)
 covid$date <- dmy(covid$date)
+vaccinations <- read_excel("vaccination.xlsx")
 
 ```
 
 
 
 ```{r variables, message=FALSE, warning=FALSE, include=FALSE}
-### Variables
 
-#country <- params$country
 
 
 ```
@@ -439,6 +438,54 @@ ggplot(hosp2, aes(x = date, y = value, group = key, fill = key)) + geom_bar(stat
 
 ```
 
+```{r vaccination highlight, message=FALSE, warning=FALSE, include=FALSE}
+vac_highlight <- covid %>%
+  filter(location == params$country) %>%
+  filter(date>=params$dts & date<= params$dte) %>%
+  dplyr::summarise(
+            total_vacination = max(total_vaccinations, na.rm = TRUE),
+            fully_vaccinated = max(people_fully_vaccinated, na.rm = TRUE),
+            vaccinated = max(people_vaccinated, na.rm = TRUE),
+            max_daily_vac = max(new_vaccinations, na.rm = TRUE),
+            max_daily_vac_day = covid$date[which.max(new_vaccinations)],
+            avg_vac = mean(new_vaccinations,na.rm = TRUE),
+            vac_ratio_1 = max(people_vaccinated, na.rm = TRUE)/max(population),
+            vac_ratio_fully = max(people_fully_vaccinated, na.rm = TRUE)/max(population)
+            )
+a<-covid %>%
+  group_by(location) %>%
+  summarise(mean_ratio_vac1 = max(people_vaccinated, na.rm = TRUE)/max(population, na.rm = TRUE),
+         mean_ratio_fully = max(people_fully_vaccinated, na.rm = TRUE)/max(population, na.rm = TRUE))
+
+mean1 <- mean(a$mean_ratio_vac1, na.rm = TRUE)
+  
+a$mean_ratio_vac1[which(!is.finite(a$mean_ratio_vac1))] <- 0
+a$mean_ratio_fully[which(!is.finite(a$mean_ratio_fully))] <- 0
+
+mean1 <- mean(a$mean_ratio_vac1)
+mean_fully <- mean(a$mean_ratio_fully)
+
+vac_data <- vaccinations %>%
+  filter(location == params$country) %>%
+  select(location, vaccines, source_name, source_website)
+
+```
+
+##### **General characteristics of COVID-19 Vaccination in ** **`r params$country`**
+
+***
+<p style="text-align:justify;"><mark> `r params$country`, uses `r vac_data$vaccines` vaccines in order to fight with COVID-19.  
+
+Source: `r vac_data$source` (`r vac_data$source_website`). 
+
+Between **`r params$dts`** and **`r params$dte`**, the number of total vaccination has been reach to **`r vac_highlight$total_vacination`** in **`r params$country`**. While **`r vac_highlight$vaccinated`** amount of people got only 1st dose of vaccination, **`r vac_highlight$fully_vaccinated`** people got both doses and got fully vaccinated. The maximum number of vaccination per day in this period has been reached to  **`r vac_highlight$max_daily_vac`**, which is reported on  **`r vac_highlight$max_daily_vac_day`** and average daily vaccination is **`r round(vac_highlight$avg_vac, 0)`**. 
+
+1st dose vaccination rate is **`r round(vac_highlight$vac_ratio_1,2)`**, which is `r ifelse(vac_highlight$vac_ratio_1 < mean1,"below",ifelse(vac_highlight$vac_ratio_1 == mean1, "equal", "above"))` from world average (world average= `r mean1`). And fully vaccinated rate is **`r round(vac_highlight$vac_ratio_fully,2)`**, which is `r ifelse(vac_highlight$vac_ratio_fully < mean_fully,"below",ifelse(vac_highlight$vac_ratio_fully == mean_fully, "equal", "above"))` from world average (world average= `r mean_fully`).</p></mark>
+
+
+<br>
+
+
 ### 2.5. COVID-19 Vaccinations
 
 <p style="text-align:justify;">In the following plot vaccinations in **`r params$country`** between **`r params$dts`** and **`r params$dte`** can be seen. </p> 
@@ -451,7 +498,6 @@ vacdata <- covid %>%
   pivot_longer(cols=c(people_fully_vaccinated,people_vaccinated),names_to = "vaccination", values_to="People") %>%
   na.omit()
 
-as.Date()
 
 vacp <- vacdata %>% 
   ggplot( aes(x=date, y=People/population, fill=vaccination, text=People/population)) +
@@ -483,4 +529,56 @@ vacp <- ggplotly(vacp)
 
 vacp
 
+```
+
+
+### 2.6. COVID-19 Daily Vaccinations and Trend
+
+```{r vaccination 2 data, echo=FALSE, message=FALSE, warning=FALSE}
+
+dvacdata <- covid %>%
+  select(location, date, new_vaccinations, population) %>%
+  filter(location == params$country & date >= params$dts & date <= params$dte) %>%
+  na.omit()
+
+start_title <- if_else(dvacdata$date[1]>params$dts,"1st Day",params$dts)
+start_date <- if_else(dvacdata$date[1]>params$dts ,dvacdata$date[1],as.Date(params$dts))
+```
+
+<p style="text-align:justify;">In the following plot daily new vaccinations and trend in **`r params$country`** between **`r start_title`** and **`r params$dte`** can be seen. </p> 
+
+```{r vaccination 2, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+
+vacdailyp <- ggplot(dvacdata, aes(x=date, y=new_vaccinations)) +
+  geom_segment( aes(x=date, xend=date, y=0, yend=new_vaccinations), color="grey") +
+  geom_point( color="orange", size=1.5) +
+  geom_smooth(method='loess', se = FALSE, size = 0.7) + 
+  theme_light() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.x = element_blank()
+  ) +
+  theme(legend.position = "none")+
+  labs(title = paste("Daily New Vaccinations and Trend", "\nfrom", start_title,"to", params$dte),
+       x = "Date",
+       y = "People")+
+  scale_y_continuous(labels = comma) +
+  scale_x_date(limits = c(as.Date(start_date, "%Y-%m-%d"), as.Date(params$dte, "%Y-%m-%d"))) +
+  theme(plot.title = element_text(color = "gray35", 
+                                  size = 11, 
+                                  face = "bold", 
+                                  hjust = 0.7),
+        axis.title.y = element_text( size=9, hjust = 0.5, color = "orange1", face = "bold"),
+        axis.text.x = element_text( size=8, hjust = 0.5),
+        axis.text.y = element_text( size=9, hjust = 0.5),
+        axis.title.y.right = element_text(size=9, hjust = 0.5, color = "steelblue", face = "bold"),
+        axis.title.x = element_text(size=10, hjust = 0.5, face="bold"))
+
+
+vacdailyp <- ggplotly(vacdailyp)
+
+vacdailyp
 ```
