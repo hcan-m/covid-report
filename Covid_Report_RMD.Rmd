@@ -209,7 +209,7 @@ qmplot(long, lat, data = total_cases,
 
 ```
 
-```{r map 2, echo=FALSE, message=FALSE, warning=FALSE}
+```{r map 2, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
 geo_info <- geo(unique(covid$location), method = 'osm')
 geo_info <- as.data.frame(geo_info) %>%na.omit()
 geo_data<-merge(x=covid,y=geo_info,by.x="location", by.y = "address", x.all=TRUE, y.all=FALSE)
@@ -474,13 +474,13 @@ vac_data <- vaccinations %>%
 ##### **General characteristics of COVID-19 Vaccination in ** **`r params$country`**
 
 ***
-<p style="text-align:justify;"><mark> `r params$country`, uses `r vac_data$vaccines` vaccines in order to fight with COVID-19.  
+<p style="text-align:justify;"><mark> `r params$country`, uses `r vac_data$vaccines` vaccines in order to fight with COVID-19. \n
 
-Source: `r vac_data$source` (`r vac_data$source_website`). 
+Source: `r vac_data$source_name` (`r vac_data$source_website`). 
 
 Between **`r params$dts`** and **`r params$dte`**, the number of total vaccination has been reach to **`r vac_highlight$total_vacination`** in **`r params$country`**. While **`r vac_highlight$vaccinated`** amount of people got only 1st dose of vaccination, **`r vac_highlight$fully_vaccinated`** people got both doses and got fully vaccinated. The maximum number of vaccination per day in this period has been reached to  **`r vac_highlight$max_daily_vac`**, which is reported on  **`r vac_highlight$max_daily_vac_day`** and average daily vaccination is **`r round(vac_highlight$avg_vac, 0)`**. 
 
-1st dose vaccination rate is **`r round(vac_highlight$vac_ratio_1,2)`**, which is `r ifelse(vac_highlight$vac_ratio_1 < mean1,"below",ifelse(vac_highlight$vac_ratio_1 == mean1, "equal", "above"))` from world average (world average= `r mean1`). And fully vaccinated rate is **`r round(vac_highlight$vac_ratio_fully,2)`**, which is `r ifelse(vac_highlight$vac_ratio_fully < mean_fully,"below",ifelse(vac_highlight$vac_ratio_fully == mean_fully, "equal", "above"))` from world average (world average= `r mean_fully`).</p></mark>
+1st dose vaccination rate is **`r paste(round(vac_highlight$vac_ratio_1,2)*100, "%")`**, which is `r ifelse(vac_highlight$vac_ratio_1 < mean1,"below",ifelse(vac_highlight$vac_ratio_1 == mean1, "equal", "above"))` from world average (world average= `r paste(round(mean1,2)*100, "%")`). And fully vaccinated rate is **`r paste(round(vac_highlight$vac_ratio_fully,2)*100, "%")`**, which is `r ifelse(vac_highlight$vac_ratio_fully < mean_fully,"below",ifelse(vac_highlight$vac_ratio_fully == mean_fully, "equal", "above"))` from world average (world average= `r paste(round(mean_fully,2)*100, "%")`).</p></mark>
 
 
 <br>
