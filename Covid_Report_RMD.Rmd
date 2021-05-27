@@ -95,49 +95,9 @@ covid <- read.csv("covid_data.csv", sep=";", header=TRUE, stringsAsFactors = FAL
 covid$date <- dmy(covid$date)
 vaccinations <- read_excel("vaccination.xlsx")
 
-
-
-<<<<<<< HEAD
-=======
 ```
 
 
-
-<!-- Related statistics are divided between Can and Didem and the structure is as below:  -->
-
-<!-- ## World total case number by country on the map Didem  -->
-
-
-<!-- ## Country’s demographic stats (Health expenditure of the country per capita percent) (first dose given % fully vaccinated %) Can -->
-
-
-<!-- ## Detailed report of Country -->
-
-
-<!-- ## First paragraph explain how situation looks like how many people died in the chosen period / how many case / how many hospitalized / how many healed / how many vaccinated / reproduction number Didem -->
-
-
-<!-- ## Total case number (line) new case Didem -->
-
-
-<!-- ## Icu-patients + hosp_patients Can -->
-
-
-<!-- ## Daily death Can -->
-
-
-<!-- ## Test number Didem -->
-
-
-<!-- ## Linear regression or correlation between test number and positive case Didem -->
-
-
-<!-- ## Vaccination (1st dose (Check if which vaccination is being used) Can -->
-
-
-<!-- ## New Vaccination (weekly group by then take max of first dose second dose) Can -->
-
->>>>>>> 3945967a9f393baf63ab1990250fb1cdca21738c
 ## 1. INTRODUCTION
 
 ### 1.1. Aim of the Project
@@ -373,7 +333,7 @@ ggplot(cases_death, aes(x=date)) +
         axis.title.x = element_text(size=10, hjust = 0.5, face="bold")) 
 ```
 
-<p style="text-align:justify;">The maximum daily case has been recorded as **`r max(cases_death$new_cases)`** in **`r cases_death$date[cases_death$new_cases == max(cases_death$new_cases)]`**, between `r params$dts` and `r params$dte`. Moreover, the correlation between daily cases and daily deaths is **`r with(cases_death, cor(new_deaths, new_cases))`**, and it indicates that there is `r ifelse(with(cases_death, cor(new_deaths, new_cases)) > 0.7, "strong positive", "weak")` correlation between cases and deaths. </p>
+<p style="text-align:justify;">The maximum daily case has been recorded as **`r max(cases_death$new_cases)`** in **`r cases_death$date[cases_death$new_cases == max(cases_death$new_cases)]`**, between `r params$dts` and `r params$dte`. Moreover, the correlation between daily cases and daily deaths is **`r round(with(cases_death, cor(new_deaths, new_cases)),2)`**, and it indicates that there is `r ifelse(with(cases_death, cor(new_deaths, new_cases)) > 0.7, "strong positive", "weak")` correlation between cases and deaths. </p>
  
 
 ### 2.3. Daily Tests and Positive Rates
@@ -389,8 +349,7 @@ test <- covid %>%
   mutate(new_positive_test = new_tests*positive_rate) %>%
   filter(date >= params$dts & date <= params$dte)
 
-# calculating correlation between daily cases and deaths
-test[is.na(test)] = 0
+
 
 ay <- list(
   overlaying = "y",
@@ -428,12 +387,19 @@ p
 
 ```
 
-<p style="text-align:justify;">The maximum total test number in a day is recorded as  **`r max(test$new_tests, na.rm=TRUE)`** in **`r test$date[test$new_tests == max(test$new_tests)]`**, between `r params$dts` and `r params$dte`. The total test numbers have been reached to **`r max(test$total_tests)`** in this period. Among daily tests, the number of average positive test is **`r mean(test$new_positive_test)`**. The positivity rate is approximately **`r mean(test$positive_rate)`** in this period. The highest positivity rate is **`r max(test$positive_rate)`**, which is recorded in **`r test$date[test$positive_rate == max(test$positive_rate)]`**. </p>
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# to calculate orrelation between daily cases and deaths for the below paragraph
+# we need to deal with NA values. So, 0 replaced withNA
+test[is.na(test)] = 0
+```
+
+<p style="text-align:justify;">The maximum total test number in a day is recorded as  **`r max(test$new_tests, na.rm=TRUE)`** in **`r test$date[test$new_tests == max(test$new_tests)]`**, between `r params$dts` and `r params$dte`. The total test numbers have been reached to **`r max(test$total_tests)`** in this period. Among daily tests, the number of average positive test is **`r round(mean(test$new_positive_test),0)`**. The positivity rate is approximately **`r round(mean(test$positive_rate),2)`** in this period. The highest positivity rate is **`r max(test$positive_rate)`**, which is recorded in **`r test$date[test$positive_rate == max(test$positive_rate)]`**. </p>
  
 
 ### 2.4. COVID-19 Hospitalizations 
 
-
+<p style="text-align:justify;">In the following graph, the hospitalizations of people who suffer from Covid-19 is provided. There are two type of patients in the graph. Dark blue bars indicates the patients hospitalized and gold-coloured bars indicates the patients in intensive care units (ICU).</p>
 
 ```{r hosp, echo=FALSE, message=FALSE, warning=FALSE}
 hosp2 <- covid %>%
@@ -460,6 +426,8 @@ ggplot(hosp2, aes(x = date, y = value, group = key, fill = key)) + geom_bar(stat
 
 
 ```
+
+<p style="text-align:justify;">The total hospitalized patients is reached its maximum with **`r max(hosp2$value)`** people in **`r hosp2$date[hosp2$key == 'hosp_patients' & hosp2$value == max(hosp2$value)]`**. Among these patients, **`r paste(round(max(hosp2$value[hosp2$key == 'icu_patients'])/max(hosp2$value[hosp2$key == 'hosp_patients'])*100,2),"%")`** of patients are in ICU.</p>
 
 ```{r vaccination highlight, message=FALSE, warning=FALSE, include=FALSE}
 vac_highlight <- covid %>%
@@ -499,11 +467,8 @@ vac_data <- vaccinations %>%
 ##### **General characteristics of COVID-19 Vaccination in ** **`r params$country`**
 
 ***
-<<<<<<< HEAD
-<mark> `r params$country`, uses `r vac_data$vaccines` vaccines in order to fight with COVID-19. \n
-=======
+
 <p style="text-align:justify;"><mark> `r params$country`, uses **`r vac_data$vaccines`** vaccines in order to fight with COVID-19. \n
->>>>>>> 3945967a9f393baf63ab1990250fb1cdca21738c
 
 Source: `r vac_data$source_name` (`r vac_data$source_website`).</mark>
 
