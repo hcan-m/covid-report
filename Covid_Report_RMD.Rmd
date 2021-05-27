@@ -138,39 +138,7 @@ covid[1:5,] %>%
 <p style="text-align:justify;">Before starting detailed analysis, it is beneficial to provide distribution and density of total Covid cases for all countries to give the general idea/information about what's happening in the world. In below map, total cases (from first reported case to last reported case) in all avaliable countries between **`r params$dts`** and **`r params$dte`** is provided. The wider bubbles indicates the higher number of cases in countries. </p> 
 
 
-```{r dataprep map, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-
-# creating  map data giving the total cases in each country
-
-total_cases <- covid %>%
-  group_by(Country = location) %>%
-  filter(date >= params$dts & date<=params$dte) %>%
-  dplyr::summarize(total_cases = sum(new_cases), date =date)%>%
-  mutate(geo(Country, method = 'osm'))
-
-theme_set(theme_bw()) # setting the plot theme
-
-```
-
-```{r map, eval=FALSE, fig.align='center', fig.height=7, fig.width=7, message=FALSE, warning=FALSE, include=FALSE}
-# creating the map 
-
-qmplot(long, lat, data = total_cases, 
-       size = total_cases,color = I("darkred"), alpha = I(0.4),
-       zoom = 4, maptype = "toner-lite", 
-       main = paste0("Total Covid-19 Cases by Country Between\n", params$dts, " and ", params$dte)) +
-  guides(size = FALSE) +
-  scale_size_continuous(range=c(1,25)) +
-  theme(plot.title = element_text(color = "gray35", 
-                                  size = 11, 
-                                  face = "bold", 
-                                  hjust = 0.5),
-        panel.border = element_rect(color = "white"),
-        legend.position = "none") 
-
-```
-
-```{r map 2, echo=FALSE, message=FALSE, warning=FALSE}
+```{r map, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
 geo_info <- geo(unique(covid$location), method = 'osm')
 geo_info <- as.data.frame(geo_info) %>%na.omit()
 geo_data<-merge(x=covid,y=geo_info,by.x="location", by.y = "address", x.all=TRUE, y.all=FALSE)

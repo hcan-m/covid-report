@@ -1,12 +1,5 @@
 base
-methods
-datasets
-utils
-grDevices
-graphics
-stats
 knitr
-grid
 vcd
 kableExtra
 readxl
