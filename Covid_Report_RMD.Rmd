@@ -90,18 +90,16 @@ library(hrbrthemes)
 # reading the data set
 
 covid <- read.csv("covid_data.csv", sep=";", header=TRUE, stringsAsFactors = FALSE)
+#link <- "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv"
+#covid <- read.csv(link, sep=",", header=TRUE, stringsAsFactors = FALSE)
 covid$date <- dmy(covid$date)
 vaccinations <- read_excel("vaccination.xlsx")
 
-```
-
-
-
-```{r variables, message=FALSE, warning=FALSE, include=FALSE}
-
 
 
 ```
+
+
 
 <!-- Related statistics are divided between Can and Didem and the structure is as below:  -->
 
@@ -209,7 +207,7 @@ qmplot(long, lat, data = total_cases,
 
 ```
 
-```{r map 2, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+```{r map 2, echo=FALSE, message=FALSE, warning=FALSE}
 geo_info <- geo(unique(covid$location), method = 'osm')
 geo_info <- as.data.frame(geo_info) %>%na.omit()
 geo_data<-merge(x=covid,y=geo_info,by.x="location", by.y = "address", x.all=TRUE, y.all=FALSE)
@@ -471,10 +469,12 @@ vac_data <- vaccinations %>%
 
 ```
 
+### 2.5. COVID-19 Vaccinations
+
 ##### **General characteristics of COVID-19 Vaccination in ** **`r params$country`**
 
 ***
-<p style="text-align:justify;"><mark> `r params$country`, uses `r vac_data$vaccines` vaccines in order to fight with COVID-19. \n
+<p style="text-align:justify;"><mark> `r params$country`, uses **`r vac_data$vaccines`** vaccines in order to fight with COVID-19. \n
 
 Source: `r vac_data$source_name` (`r vac_data$source_website`). 
 
@@ -485,8 +485,7 @@ Between **`r params$dts`** and **`r params$dte`**, the number of total vaccinati
 
 <br>
 
-
-### 2.5. COVID-19 Vaccinations
+### 2.5.1. First Dose and Fully Vaccinated
 
 <p style="text-align:justify;">In the following plot vaccinations in **`r params$country`** between **`r params$dts`** and **`r params$dte`** can be seen. </p> 
 
@@ -498,7 +497,6 @@ vacdata <- covid %>%
   pivot_longer(cols=c(people_fully_vaccinated,people_vaccinated),names_to = "vaccination", values_to="People") %>%
   na.omit()
 
-
 vacp <- vacdata %>% 
   ggplot( aes(x=date, y=People/population, fill=vaccination, text=People/population)) +
   geom_line() +
@@ -507,7 +505,7 @@ vacp <- vacdata %>%
   scale_x_date(limits = c(as.Date(params$dts, "%Y-%m-%d"), as.Date(params$dte, "%Y-%m-%d"))) +
   theme_ipsum() +
   theme(legend.position = "none")+
-  labs(title = paste("Vaccination in", params$country, "from", params$dts,"to", params$dte, "\n1st Dose and Fully Vaccinated"),
+  labs(title = paste("Vaccination in", params$country, "from", params$dts,"to", params$dte, "\nAt Least 1st Dose and Fully Vaccinated"),
        x = "Date",
        y = "Population")+
   scale_fill_manual(labels = c("Fully","1st Dose"),values = c("#246F06","#FBFE32")) +
@@ -531,8 +529,38 @@ vacp
 
 ```
 
+```{r parprep, echo=FALSE, message=FALSE, warning=FALSE}
 
-### 2.6. COVID-19 Daily Vaccinations and Trend
+first_vac_day <- covid %>% filter(location == params$country) %>% select(date,new_vaccinations) %>% na.omit()
+
+vac_par <- covid %>%
+    select(location, date, people_fully_vaccinated, people_vaccinated, new_vaccinations, population) %>%
+  filter(location == params$country) %>%
+  filter(date>=params$dts & date<= params$dte) %>%
+  na.omit() %>%
+  mutate(vac_diff = people_vaccinated - people_fully_vaccinated,
+         vac_diff_per = vac_diff/population) %>%
+  dplyr::summarise(
+            max_first = max(people_vaccinated),
+            max_fully = max(people_fully_vaccinated),
+            max_diff_per = round(max(vac_diff_per)*100, 1),
+            max_diff = max(vac_diff),
+            max_diff_date = date[which.max(vac_diff)],
+            min_diff_per = round(min(vac_diff_per)*100, 1),
+            min_diff = min(vac_diff),
+            min_diff_date = date[which.min(vac_diff)],
+            average_diff = round(mean(vac_diff),0),
+            average_diff_per = round(mean(vac_diff_per)*100, 1),            
+            average_diff_date = date[which.min(abs(vac_diff-mean(vac_diff)))]
+            )
+  
+
+
+```
+
+First day they started to vaccinate people in the **`r params$country`** was **`r first_vac_day$date[1]`**. From that time until **`r params$dte`** in total **`r vac_par$max_first`** person got at least 1 dose of vaccination while **`r vac_par$max_fully`** people got fully vaccinated against covid. Maximum difference between at least 1st dose and fully vaccinated is **`r vac_par$max_diff`** and it is **`r paste(vac_par$max_diff_per,"%")`** of population which was seen on **`r vac_par$max_diff_date`**. From other hand minimum difference is **`r vac_par$min_diff`** and it is **`r paste(vac_par$min_diff_per,"%")`** of population which happened on **`r vac_par$min_diff_date`**. If it comes to **average** difference at least first dose and fully vaccination is **`r vac_par$average_diff`** and it is **`r paste(vac_par$average_diff_per,"%")`** of population which was around **`r vac_par$average_diff_date`**.
+
+### 2.5.2. COVID-19 Daily Vaccinations and Trend
 
 ```{r vaccination 2 data, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -541,14 +569,13 @@ dvacdata <- covid %>%
   filter(location == params$country & date >= params$dts & date <= params$dte) %>%
   na.omit()
 
-start_title <- if_else(dvacdata$date[1]>params$dts,"1st Day",params$dts)
-start_date <- if_else(dvacdata$date[1]>params$dts ,dvacdata$date[1],as.Date(params$dts))
+start_title <- if_else(dvacdata$date[1]>params$dts,"1st Day",as.character(params$dts))
+start_date <- if_else(dvacdata$date[1]>params$dts ,as.character(dvacdata$date[1]),as.character(params$dts))
 ```
 
 <p style="text-align:justify;">In the following plot daily new vaccinations and trend in **`r params$country`** between **`r start_title`** and **`r params$dte`** can be seen. </p> 
 
 ```{r vaccination 2, echo=FALSE, message=FALSE, warning=FALSE}
-
 
 
 vacdailyp <- ggplot(dvacdata, aes(x=date, y=new_vaccinations)) +
@@ -582,3 +609,31 @@ vacdailyp <- ggplotly(vacdailyp)
 
 vacdailyp
 ```
+
+```{r parprep 2, echo=FALSE, message=FALSE, warning=FALSE}
+
+first_vac_day <- covid %>% filter(location == params$country) %>% select(date,new_vaccinations) %>% na.omit()
+
+new_vac_par <- covid %>%
+    select(location, date, new_vaccinations, population) %>%
+    filter(location == params$country) %>%
+    filter(date>=params$dts & date<= params$dte) %>%
+    na.omit() %>%
+    dplyr::summarise(
+              max_new = max(new_vaccinations),
+              max_new_per = round(max(new_vaccinations/population)*100, 1),
+              max_new_date = date[which.max(new_vaccinations)],
+              min_new = min(new_vaccinations),
+              min_new_per = round(min(new_vaccinations)*100, 1),
+              min_new_date = date[which.min(new_vaccinations)],
+              average_new = round(mean(new_vaccinations),0),
+              average_new_per = round(mean(new_vaccinations/population)*100, 1),            
+              average_new_date = date[which.min(abs(new_vaccinations-mean(new_vaccinations)))]
+              )
+max_trend <- vacdailyp[["x"]][["data"]][[3]][["y"]]
+max_trend_date <- as.Date(vacdailyp[["x"]][["data"]][[3]][["x"]][which.max(max_trend)])
+end_date <- as.Date(tail(vacdailyp[["x"]][["data"]][[3]][["x"]], 1))
+
+```
+
+If it comes to daily vaccination in the **`r params$country`** as we can see from the trend, it increases until **`r max_trend_date` `r ifelse(max_trend_date == end_date,"which is end date of the plot.","and then decreases.")`** Maximum new vaccination per day is **`r new_vac_par$max_new`** and it is **`r paste(new_vac_par$max_new_per,"%")`** of population which was seen on **`r new_vac_par$max_new_date`**. From other hand minimum new vaccination is **`r new_vac_par$min_new`** and it is **`r paste(new_vac_par$min_new_per,"%")`** of population which happened on **`r new_vac_par$min_new_date`**. If it comes to **average** daily new vaccinations is **`r new_vac_par$average_new`** and it is **`r paste(new_vac_par$average_new_per,"%")`** of population which was around **`r new_vac_par$average_new_date`**.
