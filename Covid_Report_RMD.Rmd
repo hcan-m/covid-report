@@ -138,9 +138,16 @@ covid[1:5,] %>%
 <p style="text-align:justify;">Before starting detailed analysis, it is beneficial to provide distribution and density of total Covid cases for all countries to give the general idea/information about what's happening in the world. In below map, total cases (from first reported case to last reported case) in all avaliable countries between **`r params$dts`** and **`r params$dte`** is provided. The wider bubbles indicates the higher number of cases in countries. </p> 
 
 
-```{r map, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
-geo_info <- geo(unique(covid$location), method = 'osm')
-geo_info <- as.data.frame(geo_info) %>%na.omit()
+```{r map, echo=FALSE, message=FALSE, warning=FALSE}
+# geo_info <- geo(unique(covid$location), method = 'osm')
+# geo_info <- as.data.frame(geo_info) %>%na.omit()
+
+#save geo_info since ittakes time to read, the creation of the geo_info is as above
+#saveRDS(geo_info, file = "geo_info.rds")
+
+#restore the geo_info file from the memory
+geo_info <- readRDS(file = "geo_info.rds")
+
 geo_data<-merge(x=covid,y=geo_info,by.x="location", by.y = "address", x.all=TRUE, y.all=FALSE)
 df <- geo_data %>%
   filter(date>=params$dts & date<= params$dte) %>%
