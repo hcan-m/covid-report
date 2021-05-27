@@ -404,6 +404,12 @@ ggplot(hosp2, aes(x = date, y = value, group = key, fill = key)) + geom_bar(stat
 
 <p style="text-align:justify;">The total hospitalized patients is reached its maximum with **`r max(hosp2$value)`** people in **`r hosp2$date[hosp2$key == 'hosp_patients' & hosp2$value == max(hosp2$value)]`**. Among these patients, **`r paste(round(max(hosp2$value[hosp2$key == 'icu_patients'])/max(hosp2$value[hosp2$key == 'hosp_patients'])*100,2),"%")`** of patients are in ICU.</p>
 
+
+
+### 2.5. COVID-19 Vaccinations
+
+##### **General characteristics of COVID-19 Vaccination in ** **`r params$country`**
+
 ```{r vaccination highlight, message=FALSE, warning=FALSE, include=FALSE}
 vac_highlight <- covid %>%
   filter(location == params$country) %>%
@@ -437,9 +443,6 @@ vac_data <- vaccinations %>%
 
 ```
 
-### 2.5. COVID-19 Vaccinations
-
-##### **General characteristics of COVID-19 Vaccination in ** **`r params$country`**
 
 ***
 
@@ -463,10 +466,12 @@ Source: `r vac_data$source_name` (`r vac_data$source_website`).</mark>
 vacdata <- covid %>%
   select(location, date, people_fully_vaccinated, people_vaccinated, new_vaccinations, population) %>%
   filter(location == params$country & date >= params$dts & date <= params$dte) %>%
-  pivot_longer(cols=c(people_fully_vaccinated,people_vaccinated),names_to = "vaccination", values_to="People") %>%
-  na.omit()
+  pivot_longer(cols=c(people_fully_vaccinated,people_vaccinated),names_to = "vaccination", values_to="People") 
+
+vacdata[is.na(vacdata)] <- 0
 
 vacp <- vacdata %>% 
+  filter(People>0) %>% 
   ggplot( aes(x=date, y=People/population, fill=vaccination, text=People/population)) +
   geom_line() +
   geom_area(position = "identity", alpha = 0.6)+
@@ -503,7 +508,7 @@ vacp
 first_vac_day <- covid %>% filter(location == params$country) %>% select(date,new_vaccinations) %>% na.omit()
 
 vac_par <- covid %>%
-    select(location, date, people_fully_vaccinated, people_vaccinated, new_vaccinations, population) %>%
+  select(location, date, people_fully_vaccinated, people_vaccinated, new_vaccinations, population) %>%
   filter(location == params$country) %>%
   filter(date>=params$dts & date<= params$dte) %>%
   na.omit() %>%
@@ -535,11 +540,14 @@ First day they started to vaccinate people in the **`r params$country`** was **`
 
 dvacdata <- covid %>%
   select(location, date, new_vaccinations, population) %>%
-  filter(location == params$country & date >= params$dts & date <= params$dte) %>%
-  na.omit()
+  filter(location == params$country & date >= params$dts & date <= params$dte) 
 
-start_title <- if_else(dvacdata$date[1]>params$dts,"1st Day",as.character(params$dts))
-start_date <- if_else(dvacdata$date[1]>params$dts ,as.character(dvacdata$date[1]),as.character(params$dts))
+first_vac_date <- first_vac_day$date[1]
+
+dvacdata[is.na(dvacdata)] <- 0
+
+start_title <- if_else(first_vac_date > params$dts,"1st Day",as.character(params$dts))
+start_date <- if_else(first_vac_date >params$dts ,as.character(dvacdata$date[1]),as.character(params$dts))
 ```
 
 <p style="text-align:justify;">In the following plot daily new vaccinations and trend in **`r params$country`** between **`r start_title`** and **`r params$dte`** can be seen. </p> 
@@ -547,7 +555,9 @@ start_date <- if_else(dvacdata$date[1]>params$dts ,as.character(dvacdata$date[1]
 ```{r vaccination 2, echo=FALSE, message=FALSE, warning=FALSE}
 
 
-vacdailyp <- ggplot(dvacdata, aes(x=date, y=new_vaccinations)) +
+vacdailyp <- dvacdata %>%
+  filter(new_vaccinations>0) %>% 
+  ggplot(aes(x=date, y=new_vaccinations)) +
   geom_segment( aes(x=date, xend=date, y=0, yend=new_vaccinations), color="grey") +
   geom_point( color="orange", size=1.5) +
   geom_smooth(method='loess', se = FALSE, size = 0.7) + 
