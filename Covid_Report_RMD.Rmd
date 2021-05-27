@@ -97,46 +97,6 @@ vaccinations <- read_excel("vaccination.xlsx")
 
 
 
-```{r variables, message=FALSE, warning=FALSE, include=FALSE}
-
-
-
-```
-
-<!-- Related statistics are divided between Can and Didem and the structure is as below:  -->
-
-<!-- ## World total case number by country on the map Didem  -->
-
-
-<!-- ## Country’s demographic stats (Health expenditure of the country per capita percent) (first dose given % fully vaccinated %) Can -->
-
-
-<!-- ## Detailed report of Country -->
-
-
-<!-- ## First paragraph explain how situation looks like how many people died in the chosen period / how many case / how many hospitalized / how many healed / how many vaccinated / reproduction number Didem -->
-
-
-<!-- ## Total case number (line) new case Didem -->
-
-
-<!-- ## Icu-patients + hosp_patients Can -->
-
-
-<!-- ## Daily death Can -->
-
-
-<!-- ## Test number Didem -->
-
-
-<!-- ## Linear regression or correlation between test number and positive case Didem -->
-
-
-<!-- ## Vaccination (1st dose (Check if which vaccination is being used) Can -->
-
-
-<!-- ## New Vaccination (weekly group by then take max of first dose second dose) Can -->
-
 ## 1. INTRODUCTION
 
 ### 1.1. Aim of the Project
@@ -209,7 +169,7 @@ qmplot(long, lat, data = total_cases,
 
 ```
 
-```{r map 2, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+```{r map 2, echo=FALSE, message=FALSE, warning=FALSE}
 geo_info <- geo(unique(covid$location), method = 'osm')
 geo_info <- as.data.frame(geo_info) %>%na.omit()
 geo_data<-merge(x=covid,y=geo_info,by.x="location", by.y = "address", x.all=TRUE, y.all=FALSE)
@@ -238,9 +198,9 @@ leaflet(geo_df) %>%
 
 ## 2. DETAILED ANALYSIS ABOUT COVID-19 
 
-<p style="text-align:justify;">In this section, several analysis about Covid-19 pandemic is provided. All analysis are reported for **`r params$country`** in the time interval **`r params$dts`** and **`r params$dte`**. It should be noted that one can produce different report results for other countries and time interval by changing the country and dates in the **"Knit with Parameters"** option.
+<p style="text-align:justify;">In this section, several analysis about Covid-19 pandemic is provided. All analysis are reported for **`r params$country`** in the time interval **`r params$dts`** and **`r params$dte`**. It should be noted that one can produce different report results for other countries and time interval by changing the country and dates in the **"Knit with Parameters"** option. </p> 
 
-Before jumping detailed visual analysis, the key highlights about Covid-19 are provided. This highlights give the general characteristics of Covid-19 pandemic in `r params$country` . </p> 
+<p style="text-align:justify;">Before jumping detailed visual analysis, the key highlights about Covid-19 are provided. This highlights give the general characteristics of Covid-19 pandemic in `r params$country` . </p> 
 
 ```{r highlight, message=FALSE, warning=FALSE, include=FALSE}
 country_highlight <- covid %>%
@@ -259,17 +219,22 @@ country_highlight <- covid %>%
             ) 
 ```
 
+<br> 
+
 ##### **General characteristics of COVID-19 in ** **`r params$country`**
 
 ***
-<p style="text-align:justify;"><mark>Between **`r params$dts`** and **`r params$dte`**, the number of total cases has been reach to **`r country_highlight$Total_Cases`** in **`r params$country`**. The maximum number of daily cases in this period has been reached to  **`r country_highlight$max_case`**, which is reported on  **`r country_highlight$date_max_case`** and average daily case is **`r round(country_highlight$Avg_New_Cases, 0)`**. In this period,  **`r country_highlight$Total_Deaths`** people have died and maximum number of death is recorded as **`r country_highlight$max_deaths`** on **`r country_highlight$max_Deaths_date`**  and average daily death is **`r round(country_highlight$Avg_Deaths, 0)`**. Reproduction rate is **`r round(country_highlight$repro_rate,2)`**, which is `r ifelse(country_highlight$repro_rate < 1.16,"below",ifelse(country_highlight$repro_rate == 1.16, "equal", "above"))` from world average (world average=1.16). It means that, on average, every 10 people with Covid will infect `r round(country_highlight$repro_rate*10,0)` other people. </p></mark>
+<p style="text-align:justify;"><mark>Between **`r params$dts`** and **`r params$dte`**, the number of total cases has been reach to **`r country_highlight$Total_Cases`** in **`r params$country`**. The maximum number of daily cases in this period has been reached to  **`r country_highlight$max_case`**, which is reported on  **`r country_highlight$date_max_case`** and average daily case is **`r as.character(round(country_highlight$Avg_New_Cases, 0))`**. In this period,  **`r country_highlight$Total_Deaths`** people have died and maximum number of death is recorded as **`r country_highlight$max_deaths`** on **`r country_highlight$max_Deaths_date`**  and average daily death is **`r round(country_highlight$Avg_Deaths, 0)`**. Reproduction rate is **`r round(country_highlight$repro_rate,2)`**, which is `r ifelse(country_highlight$repro_rate < 1.16,"below",ifelse(country_highlight$repro_rate == 1.16, "equal", "above"))` from world average (world average=1.16). It means that, on average, every 10 people with Covid will infect `r round(country_highlight$repro_rate*10,0)` other people. </p></mark>
+
 ***
 
 <br>
 
-After giving general characteristics of the pandemic in the selected time period, the detailed analysis is helpful to see the pandemic trend deeply. The following sections shows the important analysis about the country. 
+ </p> After giving general characteristics of the pandemic in the selected time period, the detailed analysis is helpful to see the pandemic trend deeply. The following sections shows the important analysis about the country. </p>
 
 ### 2.1. Total Cases and Daily Cases
+
+<p style="text-align:justify;">In the following graph, the uptrend of the total cases and daily cases of Covid-19 is provided. The orange line represents the total trends and blue bars represent the daily cases. Insight about the cases for `r params$country` is as below:</p>
 
 ```{r total and daily, message=FALSE, warning=FALSE, include=FALSE}
 
@@ -277,7 +242,8 @@ After giving general characteristics of the pandemic in the selected time period
 total_cases <- covid %>%
   filter(location == params$country ) %>%
   select(date, location, total_cases, new_cases) %>%
-  filter(date >= params$dts & date <= params$dte)
+  filter(date >= params$dts & date <= params$dte) %>%
+  na.omit()
 
 ```
 
@@ -315,10 +281,14 @@ ggplot(total_cases, aes(x=date)) +
 
 ```
 
-Explanation for the line graph will be here.
+<p style="text-align:justify;">The maximum daily case has been recorded as **`r max(total_cases$new_cases)`** in **`r total_cases$date[total_cases$new_cases == max(total_cases$new_cases)]`**, between `r params$dts` and `r params$dte`. In this period, total cases reached to **`r max(total_cases$total_cases)`**. </p>
 
+
+<br>
 
 ### 2.2. Daily Cases and Deaths
+
+<p style="text-align:justify;">The relation between cases and deaths is important insight about the pandemic. In the following graph, daily cases and dailys deaths between `r params$dts` and `r params$dte` is provided.</p>
 
 ```{r prep cases deaths, message=FALSE, warning=FALSE, include=FALSE}
 
@@ -326,8 +296,11 @@ cases_death <- covid %>%
   select(location, date,new_cases, new_deaths, total_cases) %>%
   filter(location == params$country & date >= params$dts & date <= params$dte) 
 
-
+# calculating correlation between daily cases and deaths
+cases_death[is.na(cases_death)] = 0
+    
 ```
+
 
 ```{r cases and deaths, echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(cases_death, aes(x=date)) +
@@ -359,9 +332,12 @@ ggplot(cases_death, aes(x=date)) +
         axis.title.x = element_text(size=10, hjust = 0.5, face="bold")) 
 ```
 
+<p style="text-align:justify;">The maximum daily case has been recorded as **`r max(cases_death$new_cases)`** in **`r cases_death$date[cases_death$new_cases == max(cases_death$new_cases)]`**, between `r params$dts` and `r params$dte`. Moreover, the correlation between daily cases and daily deaths is **`r with(cases_death, cor(new_deaths, new_cases))`**, and it indicates that there is `r ifelse(with(cases_death, cor(new_deaths, new_cases)) > 0.7, "strong positive", "weak")` correlation between cases and deaths. </p>
+ 
 
 ### 2.3. Daily Tests and Positive Rates
 
+<p style="text-align:justify;">The following graph shows the Covid-19 test statistics and the positivity rates. The rates is provided with orange line and tests (total test and positive tests) are provided with bars.</p>
 
 ```{r test and positve, echo=FALSE, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
 # obtaining daily tests and positive rates for selected country and selected date range
@@ -371,6 +347,9 @@ test <- covid %>%
   select(date, location, new_tests, new_tests_per_thousand,total_tests, positive_rate ) %>%
   mutate(new_positive_test = new_tests*positive_rate) %>%
   filter(date >= params$dts & date <= params$dte)
+
+# calculating correlation between daily cases and deaths
+test[is.na(test)] = 0
 
 ay <- list(
   overlaying = "y",
@@ -407,6 +386,9 @@ p
 
 
 ```
+
+<p style="text-align:justify;">The maximum total test number in a day is recorded as  **`r max(test$new_tests, na.rm=TRUE)`** in **`r test$date[test$new_tests == max(test$new_tests)]`**, between `r params$dts` and `r params$dte`. The total test numbers have been reached to **`r max(test$total_tests)`** in this period. Among daily tests, the number of average positive test is **`r mean(test$new_positive_test)`**. The positivity rate is approximately **`r mean(test$positive_rate)`** in this period. The highest positivity rate is **`r max(test$positive_rate)`**, which is recorded in **`r test$date[test$positive_rate == max(test$positive_rate)]`**. </p>
+ 
 
 ### 2.4. COVID-19 Hospitalizations 
 
@@ -474,13 +456,13 @@ vac_data <- vaccinations %>%
 ##### **General characteristics of COVID-19 Vaccination in ** **`r params$country`**
 
 ***
-<p style="text-align:justify;"><mark> `r params$country`, uses `r vac_data$vaccines` vaccines in order to fight with COVID-19. \n
+<mark> `r params$country`, uses `r vac_data$vaccines` vaccines in order to fight with COVID-19. \n
 
-Source: `r vac_data$source_name` (`r vac_data$source_website`). 
+Source: `r vac_data$source_name` (`r vac_data$source_website`).</mark>
 
-Between **`r params$dts`** and **`r params$dte`**, the number of total vaccination has been reach to **`r vac_highlight$total_vacination`** in **`r params$country`**. While **`r vac_highlight$vaccinated`** amount of people got only 1st dose of vaccination, **`r vac_highlight$fully_vaccinated`** people got both doses and got fully vaccinated. The maximum number of vaccination per day in this period has been reached to  **`r vac_highlight$max_daily_vac`**, which is reported on  **`r vac_highlight$max_daily_vac_day`** and average daily vaccination is **`r round(vac_highlight$avg_vac, 0)`**. 
+<p style="text-align:justify;"><mark>Between **`r params$dts`** and **`r params$dte`**, the number of total vaccination has been reach to **`r vac_highlight$total_vacination`** in **`r params$country`**. While **`r vac_highlight$vaccinated`** amount of people got only 1st dose of vaccination, **`r vac_highlight$fully_vaccinated`** people got both doses and got fully vaccinated. The maximum number of vaccination per day in this period has been reached to  **`r vac_highlight$max_daily_vac`**, which is reported on  **`r vac_highlight$max_daily_vac_day`** and average daily vaccination is **`r round(vac_highlight$avg_vac, 0)`**.</mark></p>
 
-1st dose vaccination rate is **`r paste(round(vac_highlight$vac_ratio_1,2)*100, "%")`**, which is `r ifelse(vac_highlight$vac_ratio_1 < mean1,"below",ifelse(vac_highlight$vac_ratio_1 == mean1, "equal", "above"))` from world average (world average= `r paste(round(mean1,2)*100, "%")`). And fully vaccinated rate is **`r paste(round(vac_highlight$vac_ratio_fully,2)*100, "%")`**, which is `r ifelse(vac_highlight$vac_ratio_fully < mean_fully,"below",ifelse(vac_highlight$vac_ratio_fully == mean_fully, "equal", "above"))` from world average (world average= `r paste(round(mean_fully,2)*100, "%")`).</p></mark>
+<p style="text-align:justify;"><mark>1st dose vaccination rate is **`r paste(round(vac_highlight$vac_ratio_1,2)*100, "%")`**, which is `r ifelse(vac_highlight$vac_ratio_1 < mean1,"below",ifelse(vac_highlight$vac_ratio_1 == mean1, "equal", "above"))` from world average (world average= `r paste(round(mean1,2)*100, "%")`). And fully vaccinated rate is **`r paste(round(vac_highlight$vac_ratio_fully,2)*100, "%")`**, which is `r ifelse(vac_highlight$vac_ratio_fully < mean_fully,"below",ifelse(vac_highlight$vac_ratio_fully == mean_fully, "equal", "above"))` from world average (world average= `r paste(round(mean_fully,2)*100, "%")`).</mark></p>
 
 
 <br>
