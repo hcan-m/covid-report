@@ -1,7 +1,3 @@
-# covid-report
-A look at the pandemic for a specified period.
+In this project, it is aimed to visualize the main insights about Covid-19 pandemic. Starting from ‘2020-01-01’ , pandemic data from all countries is recorded in the data set until ‘2021-05-05’. The data set is very useful and gives wide information about status of countries in pandemic period. There are information about cases, deaths, reproduction rates, intensive care unit (icu) patients, tests, positiveness rates, vaccinations etc. Moreover, there are also additional information giving basic demographic statistics and also health statistics about countries such as smoking status by gender, life expectancy, population and its distribution over 65+ and 70+ aged people.
 
-
-
-Ggplot2 
-Chose a color palette 
+The main objective is providing an automated report so that any one who wonder the situation about a country or in time period could select desired values and create the automatic report for that country/time line. The default country is selected as United States and the time period is selected to cover all records of the data set.
